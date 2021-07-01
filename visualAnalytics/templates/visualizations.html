@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="full-height">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hidden States for Classification</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel='stylesheet' href="{{ url_for('static', filename='style.css') }}"/>
+    <script type="text/javascript" src="static/d3/d3.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='visualizations.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='table.js') }}"></script>
+    <style type="text/css">
+            @font-face {
+                font-family: DeliusSwashCaps;
+                src: url("{{ url_for('static', filename='fonts/DeliusSwashCaps-Regular.ttf') }}");
+            }
+        </style>
+</head>
+<body class="height99" onload="init()">
+<!-- main area -->
+<div class="app containerLevel0 height99">
+    <div class="leftContainer">
+        <div class="leftItem" id="dataInfoContainer" style="display:none">
+            <div id="dataInfoTile" class="diagramTitle">
+                Dataset
+            </div>
+            <table style="width:100%">
+                <tr>
+                    <td>Classes</td>
+                    <td id="dataInfoClasses"></td>
+                </tr>
+                <tr>
+                    <td>Test Set Accuracy</td>
+                    <td id="dataInfoAcc"></td>
+                </tr>
+                <tr>
+                    <td>#Sequences</td>
+                    <td id="dataInfoSeqs"></td>
+                </tr>
+                <tr>
+                    <td>#Correctly Classified</td>
+                    <td id="dataInfoCorr"></td>
+                </tr>
+
+            </table>
+            <div id="dataInfo">
+            </div>
+        </div>
+
+        <div class="leftItem" id="classInfoContainer" style="display:none">
+            <div id="classInfoTitle" class="diagramTitle">
+                Classes
+            </div>
+            <div id="classInfo">
+            </div>
+        </div>
+
+        <div class="leftItem" id="confusionMatrixContainer" style="display:none">
+            <div id="confusionMatrixTitle" class="diagramTitle">
+                Confusion Matrix
+            </div>
+            <div id="confusionMatrix">
+            </div>
+        </div>
+
+        <div  class="leftItem" id="sequenceOverviewContainer" style="display:none">
+            <div id="sequenceOverviewTitle" class="diagramTitle">
+                Sequence Overview
+            </div>
+            <div id="sequenceOverview">
+                <table style="width:100%">
+                    <tr>
+                        <td>Sequence</td>
+                        <td id="sequenceOverviewSeq"></td>
+                    </tr>
+                    <tr>
+                        <td>Class</td>
+                        <td id="sequenceOverviewClass"></td>
+                    </tr>
+                    <tr>
+                        <td>Classification</td>
+                        <td id="sequenceOverviewPred"></td>
+                    </tr>
+                    <tr>
+                        <td>Correctly Classified</td>
+                        <td id="sequenceOverviewCorr"></td>
+                    </tr>
+                    <tr>
+                        <td>Confidence</td>
+                        <td id="sequenceOverviewConfidence"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div  class="leftItem" id="sequenceContainer" style="display:none">
+            <div id="sequenceTitle" class="diagramTitle">
+                Current Sequence
+            </div>
+            <div id="sequence">
+            </div>
+        </div>
+
+        <div class="leftItem" id="heatmapContainer" style="display:none">
+            <div id="heatmapTitle" class="diagramTitle">
+                Class Contribution
+            </div>
+            <div id="heatmap">
+            </div>
+        </div>
+
+        <div class="leftItem" id="barChart1Container" style="display:none">
+            <div id="barChart1Title" class="diagramTitle">
+                Hidden State Distances
+            </div>
+            <div id="barChart1">
+            </div>
+        </div>
+    </div>
+    <div class="itemLevel0 itemLevel0-center mainContainer full-height">
+        <div id="projectionTitle" class="diagramTitle">
+            Projection of Hidden States of LSTM Layer
+        </div>
+        <div class="mainItem">
+            <svg id="mainSvg" width="100%" height="100%">
+            </svg>
+        </div>
+        <div id="legend" style="margin-top:5px"/>
+        <span style="white-space:nowrap">
+                        <span id="binaryLegend" style="display:none">
+                        </span>
+                        <span id="classLegend">
+                        </span>
+                    </span>
+        <button class="openbtn" onclick="openNav()" id="settingsButton">☰ Settings</button>
+        <script>
+                        function openNav() {
+                          document.getElementById("mySidebar").style.width = "auto";
+                          document.getElementById("mySidebar").style.overflow = "visible";
+                          document.getElementById("settingsButton").style.visibility = "hidden";
+                          updatePlots();
+                        }
+                        function closeNav() {
+                          document.getElementById("mySidebar").style.width = "0";
+                          document.getElementById("mySidebar").style.overflow = "hidden";
+                          document.getElementById("settingsButton").style.visibility = "visible";
+                          updatePlots();
+                        }
+        </script>
+    </div>
+</div>
+
+<div id="mySidebar" class="sidebar itemLevel0 full-height rightContainer">
+    <div class="menu rightItem">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&#x2B9E;</a>
+        <section class="menuBox">
+            <input class="collapseCheckbox" type="checkbox" name="collapse0" id="handle0" style="display:none" checked="checked" >
+            <h2 class="handle">
+                <label for="handle0">Input Data</label>
+            </h2>
+            <div class="content formMainContainer">
+                <div class="content formContainer" style="padding: 2px">
+                    <select class="item60" name="datasets">
+                        {% for value in datasets %}
+                        <option value="{{ value }}">{{ value }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button class="item40" onclick="loadData()">Load Dataset</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="menuBox">
+            <input class="collapseCheckbox" type="checkbox" name="collapse3" id="handle3" style="display:none" >
+            <h2 class="handle">
+                <label for="handle3">Sequences</label>
+            </h2>
+            <div class="content">
+                <div id="page-wrap" class="scrollArea">
+                </div>
+            </div>
+        </section>
+
+        <section class="menuBox">
+            <input class="collapseCheckbox" type="checkbox" name="collapse1" id="handle1" style="display:none">
+            <h2 class="handle">
+                <label for="handle1">View</label>
+            </h2>
+            <div class="content formMainContainer">
+                <label class="heading">Labels</label>
+                <div class="content formContainer">
+                    <label class="item30">
+                        <input type="checkbox" name="showLabels" value="showLabels">
+                        After Distance
+                    </label>
+                    <label class="item30">
+                        <input type="checkbox" name="showLabelsBefore" value="showLabelsBefore">
+                        Before  Distance
+                    </label>
+                    <input style="width: 90%" type="range" min="0" max="100" value="40" class="item30 slider" id="labelsSlider">
+                </div>
+                <div class="content formContainer">
+                    <label class="item30">
+                        <input type="checkbox" name="showLabelsAfterConfidence" value="showLabelsAfterConfidence">
+                        After Confidence
+                    </label>
+                    <label class="item30">
+                        <input type="checkbox" name="showLabelsBeforeConfidence" value="showLabelsBeforeConfidence">
+                        Before Confidence
+                    </label>
+                    <input style="width: 90%" type="range" min="0" max="100" value="30" class="item30 slider" id="labelsConfidenceSlider">
+                </div>
+                <div class="content formContainer">
+                    <label class="item30">
+                        <input type="checkbox" name="showLabelsAfterClassChange" value="showLabelsAfterClassChange">
+                        After Class Change
+                    </label>
+                    <label class="item30">
+                        <input type="checkbox" name="showLabelsBeforeClassChange" value="showLabelsBeforeClassChange">
+                        Before Class Change
+                    </label>
+                </div>
+                <label class="heading">Samples</label>
+                <div class="content formContainer">
+                    <label class="item50">
+                        <input type="checkbox" id="showFirstSamples" value="showFirstSamples">
+                        Show Start Samples
+                    </label>
+                    <label class="item50">
+                        <input type="checkbox" id="showLastSamples" value="showLastSamples">
+                        Show Last Samples
+                    </label>
+                </div>
+
+                <div class="content formContainer">
+                    <label class="item50">
+                        <input type="checkbox" id="fadeCorrectPredicted" value="fadeCorrectPredicted">
+                        Fade Correctly Classified
+                    </label>
+                    <label class="item50">
+                        <input type="checkbox" id="fadeWrongPredicted" value="fadeWrongPredicted">
+                        Fade Wrong Classified
+                    </label>
+                </div>
+
+                <div class="content formContainer">
+                    <label class="item100">
+                        <input type="checkbox" id="colorsClasses" value="colorsClasses">
+                        Color by Classes instead of Classification
+                    </label>
+                </div>
+                <label class="heading">Trajectory</label>
+                <div class="content formContainer">
+                    <label class="item30">
+                        <input type="checkbox" name="blackTimelines" value="blackTimelines">
+                        Black
+                    </label>
+                    <label class="item30">
+                        <input type="checkbox" id="thicknessTime" value="thicknessTime">
+                        Thickness by Time
+                    </label>
+                    <label class="item30">
+                        <input type="checkbox" id="thicknessDistance" value="thicknessDistance">
+                        Thickness by Distance
+                    </label>
+                </div>
+                <label class="heading">Scaling</label>
+                <div class="formContainer">
+                    <div class="item50">
+                        <label style="margin:10px">Sample:</label>
+                        <input style="width: 90%" type="range" min="0" max="50" value="12" class="slider" id="sampleSlider">
+                    </div>
+                    <div class="item50">
+                        <label style="margin:10px">Lines:</label>
+                        <input style="width: 90%" type="range" min="0" max="50" value="10" class="slider" id="lineSlider">
+                    </div>
+                </div>
+                <div class="buttonbox">
+                    <button onclick="updateItems()">Update</button>
+                    <button onclick="updateAndResize()">Update and Resize</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</div>
+</body>
+</html>

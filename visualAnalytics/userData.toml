@@ -1,0 +1,3 @@
+"imdb_tsne"="../demonstrationData/imdb_noBr_99/data_projection_tsne_nopad_rs9999_p100_RS99.json"
+"reuters_tsne"="../demonstrationData/reuters_101/data_projection_tsne_nopad_rs42_p100_RS101.json"
+"reuters_pca"="../demonstrationData/reuters_101/data_projection_pca_nopad_rs99_RS101.json"
