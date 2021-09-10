@@ -34,7 +34,7 @@ def dimRed():
     parameters = request.get_json()
     dataset = parameters["dataset"]
 
-    # read toml file
+    # read json file
     with open(userData[dataset]) as f:
         data = json.load(f)
 
