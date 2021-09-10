@@ -31,14 +31,15 @@ Our project is licensed under the [MIT License](LICENSE.md).
 
 When referencing our work, please cite our paper *A Visual Analytics Tool for the Interpretation of Hidden States in Recurrent Neural Networks*.
 
-R. Garcia, T. Munz, and D. Weiskopf. A Visual Analytics Tool for the Interpretation of Hidden States in Recurrent Neural Networks. Visual Computing for Industry, Biomedicine, and Art (VCIBA). 2021. 
+R. Garcia, T. Munz, and D. Weiskopf. Visual Analytics Tool for the Interpretation of Hidden States in Recurrent Neural Networks. Visual Computing for Industry, Biomedicine, and Art (VCIBA). 2021. DOI: 10.1186/s42492-021-00090-0.
 
 ```
 @article{vciba2021hiddenStates,
   author    = {Garcia, Rafael and Munz, Tanja and and Weiskopf, Daniel},
-  title     = {A Visual Analytics Tool for the Interpretation of Hidden States in Recurrent Neural Networks},
+  title     = {Visual Analytics Tool for the Interpretation of Hidden States in Recurrent Neural Networks},
   journal   = {Visual Computing for Industry, Biomedicine, and Art (VCIBA)},
   year      = {2021},
+  doi       = {10.1186/s42492-021-00090-0},
 }
 ```
 &nbsp;

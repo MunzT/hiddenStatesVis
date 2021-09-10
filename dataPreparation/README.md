@@ -19,8 +19,8 @@ python3 reutersLstms.py [rs]
 python3 imdbLstms.py [rs]
 ```
 
-rs stands for the random state used by Python and Tensorflow.
-In case rs is not given, the same values are used that were used for the example data.
+*rs* stands for the random state used by Python and Tensorflow.
+In case *rs* is not given, the same values are used that were used for the example data.
 
 You can find preprocessed datasets in the directory `demonstrationData` for immediate use in our visual analytics system.
 
